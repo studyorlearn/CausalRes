@@ -177,12 +177,6 @@ class CausalCNNEncoder(torch.nn.Module):
         return self.network(x)
 
 
-import torch
-import torch.nn as nn
-from torch import Tensor
-from typing import Callable, List, Optional, Type, Union
-
-
 def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> nn.Conv2d:
     """3x3 convolution with padding"""
     return nn.Conv1d(
@@ -439,18 +433,19 @@ class MLP(nn.Module):
         
         # Append the first layer (input to first hidden layer)
         layers.append(nn.Linear(input_size, hidden_sizes[0]))
-        layers.append(nn.ReLU())
         
         # Append hidden layers
         for i in range(1, len(hidden_sizes)):
-            layers.append(nn.Linear(hidden_sizes[i-1], hidden_sizes[i]))
             layers.append(nn.ReLU())
+            layers.append(nn.Linear(hidden_sizes[i-1], hidden_sizes[i]))
+            
         
         # Append the output layer
         layers.append(nn.Linear(hidden_sizes[-1], output_size))
+        # layers.append(nn.Softmax())
         
-        # Use nn.ModuleList to store the layers
-        self.layers = nn.ModuleList(layers)
+        # Use nn.Sequential to store the layers
+        self.layers = nn.Sequential(*layers)
     
     def forward(self, x):
         # Pass input through each layer in the list
@@ -498,6 +493,7 @@ class CNN(nn.Module):
         return x.numel() // x.size(0)
     
     def forward(self, x):
+        x = x.permute(0, 2, 1)
         x = self.conv_layers(x)
         x = torch.flatten(x, start_dim=1)
         x = self.fc_layers(x)
@@ -512,9 +508,9 @@ class CNNResNet(torch.nn.Module):
         
     
     def forward(self, x):
-        out = self.causalCNNencode(x)
+        out = self.cnn(x)
         out = out.unsqueeze(1)
-        out = self.cnn(out)
+        out = self.resnet(out)
         return out
         
 
