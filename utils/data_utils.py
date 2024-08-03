@@ -5,9 +5,8 @@ import torch
 from scipy.io import loadmat
 from torch.utils.data import Dataset, DataLoader
 
-
 def get_data_tag(faultP=[0, 1], desample=512):
-    filename = [f"E:/CodeProjects/CausalRes/data/processed/fault_probability_{i}.mat" for i in [15, 25, 50, 75, 100]]
+    filename = [f"../data/processed/fault_probability_{i}.mat" for i in [15, 25, 50, 75, 100]]
     data = None
     tag = None
     for item in faultP:
@@ -54,7 +53,7 @@ def get_dataloader(data, labels, batch_size=32):
 if __name__ == '__main__':
 
     data, tag = get_data_tag()
-    print(data.shape, tag.shape, tag.max(), tag.min() )
+    print(data.shape, tag.shape, tag.max(), tag.min(), cost_time)
     train_loader, test_loader = get_dataloader(data, tag)
     for x, y in train_loader:
         print(x.shape, y.shape)
