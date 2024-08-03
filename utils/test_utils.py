@@ -180,11 +180,16 @@ class Tester():
         plt.ylabel("Actual Label")
         plt.show()
         
-        
-def calculate_specificity(y_true, y_pred):
-    """Calculate the specificity of a confusion matrix."""
-    cm = confusion_matrix(y_true, y_pred)
-    tn = cm[0, 0]
-    fp = cm[0, 1]
-    specificity = tn / (tn + fp)
-    return specificity
+def calculate_macro_specificity(conf_matrix):
+    num_classes = conf_matrix.shape[0]
+    specificities = np.zeros(num_classes)   
+    for i in range(num_classes):
+        true_negatives = np.sum(conf_matrix) - np.sum(conf_matrix[i, :]) - np.sum(conf_matrix[:, i]) + conf_matrix[i, i]
+        false_positives = np.sum(conf_matrix[:, i]) - conf_matrix[i, i]
+        if (true_negatives + false_positives) > 0:
+            specificities[i] = true_negatives / (true_negatives + false_positives)
+        else:
+            specificities[i] = 0.0
+    macro_specificity = np.mean(specificities)
+    
+    return macro_specificity
